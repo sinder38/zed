@@ -901,6 +901,75 @@ mod tests {
     }
 
     #[gpui::test]
+    async fn test_mnemonics(cx: &mut TestAppContext) {
+        let app_state = init_test(cx);
+        let db = cx.update(|cx| persistence::CommandPaletteDB::global(cx));
+        db.clear_all().await.unwrap();
+        let project = Project::test(app_state.fs.clone(), [], cx).await;
+        let (multi_workspace, cx) =
+            cx.add_window_view(|window, cx| MultiWorkspace::test_new(project.clone(), window, cx));
+        let workspace = multi_workspace.read_with(cx, |mw, _| mw.workspace().clone());
+
+        let editor = cx.new_window_entity(|window, cx| {
+            let mut editor = Editor::single_line(window, cx);
+            editor.set_text("abc", window, cx);
+            editor
+        });
+
+        workspace.update_in(cx, |workspace, window, cx| {
+            workspace.add_item_to_active_pane(Box::new(editor.clone()), None, true, window, cx);
+            editor.update(cx, |editor, cx| window.focus(&editor.focus_handle(cx), cx))
+        });
+
+        // Please refer to:  ./docs/src/vim.md:359
+        let mnemonics: &[(&str, &str)] = &[
+            ("zlog", "zed: open log"),
+            ("newf", "workspace: new file"),
+            ("diffs", "editor: toggle selected diff hunks"),
+            ("crp", "workspace: copy relative path"),
+            ("cpp", "workspace: copy path"),
+            ("reveal", "editor: reveal in file manager"),
+            ("clank", "cancel language server work"),
+        ];
+
+
+        for (query, expected_first_match) in mnemonics {
+            cx.simulate_keystrokes("cmd-shift-p");
+            cx.run_until_parked();
+
+            let palette = workspace.update(cx, |workspace, cx| {
+                workspace
+                    .active_modal::<CommandPalette>(cx)
+                    .unwrap()
+                    .read(cx)
+                    .picker
+                    .clone()
+            });
+
+            cx.simulate_input(query);
+            cx.background_executor.run_until_parked();
+
+            palette.read_with(cx, |palette, _| {
+                assert!(
+                    palette.delegate.matches.is_some(),
+                    "no matches for mnemonic {:?}",
+                    query
+                );
+                assert_eq!(
+                    palette.delegate.matches[0].string,
+                    *expected_first_match,
+                    "mnemonic {:?} should match {:?} first",
+                    query,
+                    expected_first_match
+                );
+            });
+
+            cx.simulate_keystrokes("cmd-shift-p");
+            cx.run_until_parked();
+        }
+    }
+
+    #[gpui::test]
     async fn test_go_to_line(cx: &mut TestAppContext) {
         let app_state = init_test(cx);
         let project = Project::test(app_state.fs.clone(), [], cx).await;
