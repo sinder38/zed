@@ -930,7 +930,7 @@ mod tests {
             ("crp", "workspace: copy relative path"),
             ("cpp", "workspace: copy path"),
             ("reveal", "editor: reveal in file manager"),
-            ("clank", "cancel language server work"),
+            ("clank", "editor: cancel language server work"),
         ];
 
 
@@ -952,7 +952,7 @@ mod tests {
 
             palette.read_with(cx, |palette, _| {
                 assert!(
-                    palette.delegate.matches.is_some(),
+                    !palette.delegate.matches.is_empty(),
                     "no matches for mnemonic {:?}",
                     query
                 );

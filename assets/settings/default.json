@@ -2481,10 +2481,12 @@
   "proxy": "",
   // Set to configure aliases for the command palette.
   // When typing a query which is a key of this object, the value will be used instead.
+  // Set a key to null to remove a default alias.
   //
   // Examples:
   // {
-  //   "W": "workspace::Save"
+  //   "W": "workspace::Save",
+  //   "cpp": null
   // }
   "command_aliases": {
     "zlog": "zed::OpenLog",

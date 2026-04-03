@@ -96,7 +96,11 @@ impl Settings for WorkspaceSettings {
             drop_target_size: workspace.drop_target_size.unwrap(),
             use_system_path_prompts: workspace.use_system_path_prompts.unwrap(),
             use_system_prompts: workspace.use_system_prompts.unwrap(),
-            command_aliases: workspace.command_aliases.clone(),
+            command_aliases: workspace
+                .command_aliases
+                .iter()
+                .filter_map(|(k, v)| v.as_ref().map(|v| (k.clone(), v.clone())))
+                .collect(),
             max_tabs: workspace.max_tabs,
             when_closing_with_no_tabs: workspace.when_closing_with_no_tabs.unwrap(),
             on_last_window_closed: workspace.on_last_window_closed.unwrap(),

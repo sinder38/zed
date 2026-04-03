@@ -81,11 +81,12 @@ pub struct WorkspaceSettingsContent {
     /// Default: true
     pub use_system_prompts: Option<bool>,
     /// Aliases for the command palette. When you type a key in this map,
-    /// it will be assumed to equal the value.
+    /// it will be assumed to equal the value. Set a key to `null` to remove
+    /// a default alias.
     ///
-    /// Default: true
+    /// Default: {}
     #[serde(default)]
-    pub command_aliases: HashMap<String, String>,
+    pub command_aliases: HashMap<String, Option<String>>,
     /// Maximum open tabs in a pane. Will not close an unsaved
     /// tab. Set to `None` for unlimited tabs.
     ///
