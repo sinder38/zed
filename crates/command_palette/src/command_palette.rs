@@ -912,6 +912,7 @@ mod tests {
 
         let editor = cx.new_window_entity(|window, cx| {
             let mut editor = Editor::single_line(window, cx);
+            
             editor.set_text("abc", window, cx);
             editor
         });
